@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Website Class DKV</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* Sakura Falling Animation */
+    @keyframes fall {
+      0% { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 1; }
+      100% { transform: translate3d(20vw, 110vh, 0) rotate(360deg); opacity: 0; }
+    }
+    .sakura-petal {
+      position: fixed;
+      top: -10%;
+      z-index: 10;
+      pointer-events: none;
+      background: linear-gradient(135deg, #ffb7c5, #ffb7c5);
+      border-radius: 15px 2px 15px 15px;
+      animation: fall linear infinite;
+      box-shadow: 0 2px 5px rgba(255, 183, 197, 0.4);
+    }
+    /* Glassmorphism Classes */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 10px 30px 0 rgba(244, 63, 94, 0.08);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-card:hover {
+      box-shadow: 0 15px 35px 0 rgba(244, 63, 94, 0.12);
+    }
+    /* Smooth transitions */
+    .view-section {
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .view-hidden {
+      display: none !important;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    /* Scrollbar hide */
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* Custom Smooth Animation Pulse */
+    @keyframes pulse-soft {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+    .pulse-soft {
+      animation: pulse-soft 3s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="text-gray-800 font-sans min-h-screen relative overflow-x-hidden pb-24 transition-all duration-700 bg-rose-50" style="background-attachment: fixed; background-size: cover; background-position: center;">
+
+  <!-- Sakura Falling Leaves Container -->
+  <div id="sakura-container" class="fixed inset-0 pointer-events-none z-10"></div>
+
+  <!-- Background Music Element -->
+  <audio id="bg-music" loop class="hidden"></audio>
+
+  <!-- Layout Wrapper -->
+  <div class="relative z-20 max-w-7xl mx-auto px-4 py-6 flex flex-col md:flex-row gap-6">
+    
+    <!-- Sidebar / Navigasi -->
+    <aside class="glass-card rounded-3xl p-6 md:w-64 flex-shrink-0 flex flex-col gap-5 h-fit md:sticky md:top-6 shadow-xl">
+      <div class="text-center pb-4 border-b border-pink-200/50 relative">
+        <!-- Logo Preview Link -->
+        <div class="relative group w-20 h-20 mx-auto mb-3">
+          <div class="absolute inset-0 bg-pink-300 rounded-full blur opacity-30 group-hover:opacity-60 transition-opacity"></div>
+          <img id="nav-logo" src="https://files.catbox.moe/lyxkgp.png" alt="Logo" class="w-20 h-20 rounded-full border-2 border-white shadow-md object-cover relative z-10 transition-transform duration-500 group-hover:rotate-12">
+        </div>
+        <h1 id="nav-title" class="text-xl font-bold text-pink-700 leading-tight transition-colors duration-300">DKV Class</h1>
+        <p id="nav-subtitle" class="text-xs text-gray-500 mt-1">SMK Muhammadiyah 7 Kedumpring</p>
+      </div>
+
+      <!-- Realtime Clock Widget -->
+      <div class="bg-white/80 border border-pink-100/60 p-3 rounded-2xl text-center shadow-inner">
+        <p class="text-[10px] text-pink-500 font-bold tracking-wider uppercase"><i class="fa-regular fa-clock animate-spin-slow"></i> Waktu Asia/Jakarta</p>
+        <p id="realtime-clock" class="text-lg font-mono font-bold text-gray-800 mt-0.5">00:00:00 WIB</p>
+        <p id="realtime-date" class="text-[10px] text-gray-400 mt-0.5">Selasa, 26 Mei 2026</p>
+      </div>
+
+      <!-- Nav Links -->
+      <nav class="flex flex-col gap-2">
+        <button onclick="switchView('beranda')" id="btn-beranda" class="nav-btn flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium text-pink-600 bg-pink-50 shadow-sm"><i class="fa-solid fa-house"></i> Beranda</button>
+        <button onclick="switchView('foto')" id="btn-foto" class="nav-btn flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium text-gray-600 hover:bg-pink-50 hover:text-pink-600"><i class="fa-solid fa-images"></i> Galeri Foto</button>
+        <button onclick="switchView('video')" id="btn-video" class="nav-btn flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium text-gray-600 hover:bg-pink-50 hover:text-pink-600"><i class="fa-solid fa-clapperboard"></i> Galeri Video</button>
+        <button onclick="switchView('komentar')" id="btn-komentar" class="nav-btn flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium text-gray-600 hover:bg-pink-50 hover:text-pink-600"><i class="fa-solid fa-comments"></i> Buku Tamu</button>
+        <button onclick="switchView('admin')" id="btn-admin" class="nav-btn flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium text-gray-600 hover:bg-pink-50 hover:text-pink-600 border-t border-pink-100/50 mt-4 pt-4"><i class="fa-solid fa-user-gear"></i> Panel Admin</button>
+      </nav>
+
+      <!-- Music Status -->
+      <div id="music-indicator" class="hidden text-xs bg-pink-50/50 p-3 rounded-xl text-pink-700 flex items-center gap-2 justify-center transition-all duration-500">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-pink-500"></span>
+        </span>
+        <span class="truncate font-semibold"><i class="fa-solid fa-music text-pink-500 animate-bounce"></i> Musik Latar Aktif</span>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 w-full relative">
+
+      <!-- ================= BERANDA VIEW ================= -->
+      <section id="view-beranda" class="view-section glass-card rounded-3xl p-8 md:p-12 text-center min-h-[75vh] flex flex-col justify-center items-center shadow-lg">
+        <div class="relative mb-8 transform hover:scale-105 transition-transform duration-500">
+          <div class="absolute inset-0 bg-pink-300 rounded-full blur-2xl opacity-40 pulse-soft"></div>
+          <img id="class-logo" src="https://files.catbox.moe/lyxkgp.png" alt="Logo Kelas" class="w-36 h-36 md:w-48 md:h-48 rounded-full border-4 border-white shadow-2xl object-cover relative z-10 transition-all duration-500">
+        </div>
+        <h2 id="home-class-name" class="text-4xl md:text-6xl font-extrabold text-pink-800 drop-shadow-sm mb-3 transition-colors duration-300">X DKV</h2>
+        <h3 id="home-sub" class="text-xl md:text-2xl text-pink-600 font-semibold mb-6 transition-colors duration-300">Angkatan 25 - SMK Muhammadiyah 7 Kedumpring</h3>
+        
+        <div class="bg-white/60 backdrop-blur-sm p-6 rounded-2xl w-full max-w-2xl shadow-inner border border-white/40 mb-8 transform hover:scale-[1.01] transition-all duration-300">
+          <p id="home-desc" class="text-gray-700 md:text-lg italic leading-relaxed">
+            "Selamat datang di website kenangan kelas kami. Tempat di mana setiap momen indah diabadikan dalam kedamaian guguran dkv."
+          </p>
+        </div>
+
+        <div class="inline-flex items-center gap-3 bg-pink-100 text-pink-800 px-6 py-3 rounded-full font-bold shadow-sm border border-pink-200 transition-colors duration-300">
+          <i class="fa-solid fa-user-tie text-pink-500"></i>
+          <span>Wali Kelas: <span id="home-wali">Bpk. Aris Abdul Ghofur</span></span>
+        </div>
+      </section>
+
+      <!-- ================= GALERI FOTO VIEW ================= -->
+      <section id="view-foto" class="view-section view-hidden glass-card rounded-3xl p-6 md:p-8 shadow-lg">
+        <div class="flex items-center gap-4 border-b border-pink-100 pb-5 mb-6">
+          <div class="p-3 bg-pink-100 rounded-2xl text-pink-600"><i class="fa-solid fa-images text-2xl"></i></div>
+          <div>
+            <h2 class="text-2xl md:text-3xl font-bold text-pink-800">Galeri Foto</h2>
+            <p class="text-xs md:text-sm text-gray-500">Ketuk salah satu foto untuk melihat detail, menyukai, dan memberi komentar.</p>
+          </div>
+        </div>
+        <!-- 3-Column Grid for Photo Gallery -->
+        <div id="grid-foto" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <!-- Dinamis -->
+        </div>
+      </section>
+
+      <!-- ================= GALERI VIDEO VIEW ================= -->
+      <section id="view-video" class="view-section view-hidden glass-card rounded-3xl p-6 md:p-8 shadow-lg">
+        <div class="flex items-center gap-4 border-b border-pink-100 pb-5 mb-6">
+          <div class="p-3 bg-pink-100 rounded-2xl text-pink-600"><i class="fa-solid fa-clapperboard text-2xl"></i></div>
+          <div>
+            <h2 class="text-2xl md:text-3xl font-bold text-pink-800">Galeri Video</h2>
+            <p class="text-xs md:text-sm text-gray-500">Ketuk salah satu video untuk memutar dan berinteraksi ala Instagram.</p>
+          </div>
+        </div>
+        <!-- 3-Column Grid for Video Gallery -->
+        <div id="grid-video" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <!-- Dinamis -->
+        </div>
+      </section>
+
+      <!-- ================= BUKU TAMU / KOMENTAR VIEW ================= -->
+      <section id="view-komentar" class="view-section view-hidden glass-card rounded-3xl p-6 md:p-10 shadow-lg max-w-4xl mx-auto">
+        <div class="text-center mb-8">
+          <h2 class="text-3xl font-extrabold text-pink-800 mb-2">Buku Tamu</h2>
+          <p class="text-sm text-gray-500">Tinggalkan pesan, kesan, atau sekadar salam hangat untuk perkembangan sekolah kita.</p>
+        </div>
+
+        <!-- Form Tambah Komentar -->
+        <form id="comment-form" class="mb-8 bg-white/70 p-5 rounded-2xl border border-white/50 shadow-sm flex flex-col gap-4 transform hover:shadow-md transition-all">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-pink-100">
+              <i class="fa-solid fa-user text-pink-400"></i>
+              <input type="text" id="cmt-sender" placeholder="Nama Anda..." required class="bg-transparent border-none outline-none w-full text-sm font-semibold">
+            </div>
+            <div class="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-pink-100">
+              <i class="fa-solid fa-address-card text-pink-400"></i>
+              <input type="text" id="cmt-role" placeholder="Status (Wali Murid / Siswa / Alumni)..." class="bg-transparent border-none outline-none w-full text-sm">
+            </div>
+          </div>
+          <div class="relative">
+            <textarea id="cmt-text" placeholder="Tulis pesan terbaik Anda di sini..." required class="w-full bg-white border border-pink-100 rounded-xl p-3 text-sm outline-none focus:ring-1 focus:ring-pink-300 resize-none h-24"></textarea>
+          </div>
+          <button type="submit" class="self-end bg-pink-500 hover:bg-pink-600 text-white font-semibold px-6 py-2 rounded-xl transition-all shadow-md flex items-center gap-2 transform hover:-translate-y-0.5">
+            <i class="fa-solid fa-paper-plane"></i> Kirim Pesan
+          </button>
+        </form>
+
+        <!-- List Buku Tamu -->
+        <div id="comment-list" class="space-y-4">
+          <!-- Dinamis -->
+        </div>
+      </section>
+
+      <!-- ================= ADMIN PANEL VIEW ================= -->
+      <section id="view-admin" class="view-section view-hidden glass-card rounded-3xl p-6 md:p-8 shadow-lg max-w-5xl mx-auto">
+        <!-- Login Form -->
+        <div id="admin-login-box" class="py-12 max-w-sm mx-auto text-center">
+          <div class="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center text-pink-500 mx-auto mb-4 border-2 border-white shadow-md">
+            <i class="fa-solid fa-lock text-xl"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-800 mb-6">Akses Panel Admin</h2>
+          <form id="admin-login-form" class="flex flex-col gap-4">
+            <input type="password" id="admin-password" placeholder="Masukkan Password Admin" required class="px-4 py-3 rounded-xl border border-pink-100 focus:border-pink-500 outline-none text-center bg-white">
+            <p id="login-error" class="text-red-500 text-xs hidden">Password salah! Silakan coba lagi.</p>
+            <button type="submit" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 rounded-xl transition-colors shadow-md">Masuk Panel</button>
+          </form>
+        </div>
+
+        <!-- Dashboard Konten Admin (Hanya tampil setelah login berhasil) -->
+        <div id="admin-dashboard" class="hidden space-y-6">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center bg-gradient-to-r from-pink-600 to-pink-500 text-white p-6 rounded-2xl border-none shadow-lg gap-4">
+            <div>
+              <h2 class="text-2xl font-bold flex items-center gap-2"><i class="fa-solid fa-chart-line animate-pulse"></i> Dasbor Admin & Statistik</h2>
+              <p class="opacity-90 text-xs mt-1">Ubah logo, beranda, kelola galeri, pantau aktivitas realtime, serta moderasi komentar.</p>
+            </div>
+            <button onclick="logoutAdmin()" class="bg-white text-pink-600 hover:bg-pink-50 text-xs font-bold px-4 py-2.5 rounded-xl transition-colors shadow-sm self-stretch md:self-auto text-center">Keluar Panel</button>
+          </div>
+
+          <!-- STATISTIK KONTEN REALTIME -->
+          <div class="grid grid-cols-2 lg:grid-cols-6 gap-4">
+            <div class="bg-white/80 p-4 rounded-2xl border border-white/50 shadow-sm flex flex-col items-center justify-center text-center">
+              <i class="fa-solid fa-users text-blue-500 text-xl mb-1"></i>
+              <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">User Join</span>
+              <span id="stat-users" class="text-xl font-extrabold text-gray-800">0</span>
+            </div>
+            <div class="bg-white/80 p-4 rounded-2xl border border-white/50 shadow-sm flex flex-col items-center justify-center text-center">
+              <i class="fa-solid fa-shoe-prints text-indigo-500 text-xl mb-1"></i>
+              <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Aktivitas</span>
+              <span id="stat-logs" class="text-xl font-extrabold text-gray-800">0</span>
+            </div>
+            <div class="bg-white/80 p-4 rounded-2xl border border-white/50 shadow-sm flex flex-col items-center justify-center text-center">
+              <i class="fa-solid fa-image text-pink-500 text-xl mb-1"></i>
+              <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Total Foto</span>
+              <span id="stat-photos" class="text-xl font-extrabold text-gray-800">0</span>
+            </div>
+            <div class="bg-white/80 p-4 rounded-2xl border border-white/50 shadow-sm flex flex-col items-center justify-center text-center">
+              <i class="fa-solid fa-video text-purple-500 text-xl mb-1"></i>
+              <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Total Video</span>
+              <span id="stat-videos" class="text-xl font-extrabold text-gray-800">0</span>
+            </div>
+            <div class="bg-white/80 p-4 rounded-2xl border border-white/50 shadow-sm flex flex-col items-center justify-center text-center">
+              <i class="fa-solid fa-comments text-green-500 text-xl mb-1"></i>
+              <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Buku Tamu</span>
+              <span id="stat-guestbook" class="text-xl font-extrabold text-gray-800">0</span>
+            </div>
+            <div class="bg-white/80 p-4 rounded-2xl border border-white/50 shadow-sm flex flex-col items-center justify-center text-center">
+              <i class="fa-solid fa-heart text-red-500 text-xl mb-1"></i>
+              <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Total Likes</span>
+              <span id="stat-likes" class="text-xl font-extrabold text-gray-800">0</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Form Setting Tema -->
+            <div class="bg-white/70 p-5 rounded-2xl border border-white/50 shadow-sm space-y-4">
+              <h3 class="text-lg font-bold text-pink-800 border-b pb-2"><i class="fa-solid fa-sliders"></i> Informasi Beranda</h3>
+              
+              <form id="settings-form" class="grid grid-cols-2 gap-3">
+                <div class="col-span-2 flex flex-col gap-1">
+                  <label class="text-xs font-semibold text-gray-600">Judul Website</label>
+                  <input type="text" id="set-title" name="title" class="p-2 border rounded-lg text-sm bg-white outline-none focus:ring-1 focus:ring-pink-300">
+                </div>
+                <div class="col-span-2 flex flex-col gap-1">
+                  <label class="text-xs font-semibold text-gray-600">Nama Sekolah</label>
+                  <input type="text" id="set-school" name="sekolah" class="p-2 border rounded-lg text-sm bg-white outline-none focus:ring-1 focus:ring-pink-300">
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-xs font-semibold text-gray-600">Nama Kelas</label>
+                  <input type="text" id="set-classname" name="namaKelas" class="p-2 border rounded-lg text-sm bg-white outline-none focus:ring-1 focus:ring-pink-300">
+                </div>
+                <div class="flex flex-col gap-1">
+                  <label class="text-xs font-semibold text-gray-600">Angkatan / No</label>
+                  <input type="text" id="set-classno" name="nomorKelas" class="p-2 border rounded-lg text-sm bg-white outline-none focus:ring-1 focus:ring-pink-300">
+                </div>
+                <div class="col-span-2 flex flex-col gap-1">
+                  <label class="text-xs font-semibold text-gray-600">Wali Kelas</label>
+                  <input type="text" id="set-wali" name="waliKelas" class="p-2 border rounded-lg text-sm bg-white outline-none focus:ring-1 focus:ring-pink-300">
+                </div>
+                <div class="col-span-2 flex flex-col gap-1">
+                  <label class="text-xs font-semibold text-gray-600">Keterangan/Sambutan</label>
+                  <textarea id="set-desc" name="desc" class="p-2 border rounded-lg text-sm bg-white h-20 resize-none outline-none focus:ring-1 focus:ring-pink-300"></textarea>
+                </div>
+                
+                <!-- Ganti Logo Sekolah / Kelas -->
+                <div class="col-span-2 flex flex-col gap-1 border border-dashed border-pink-300 p-3 rounded-xl bg-pink-50/30">
+                  <label class="text-xs font-bold text-pink-800 flex items-center gap-1"><i class="fa-solid fa-tree"></i> Ganti Logo Website (Bulat)</label>
+                  <input type="file" id="set-logo-file" name="logoFile" accept="image/*" class="text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-pink-100 file:text-pink-700 hover:file:bg-pink-200 cursor-pointer">
+                </div>
+
+                <!-- Background Image (File Manager) -->
+                <div class="col-span-2 flex flex-col gap-1 border border-dashed border-pink-300 p-3 rounded-xl bg-pink-50/30">
+                  <label class="text-xs font-bold text-pink-800 flex items-center gap-1"><i class="fa-solid fa-image"></i> Ganti Background Website</label>
+                  <input type="file" id="set-bgimage-file" name="bgImageFile" accept="image/*" class="text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-pink-100 file:text-pink-700 hover:file:bg-pink-200 cursor-pointer">
+                </div>
+
+                <div class="col-span-2 flex flex-col gap-1">
+                  <label class="text-xs font-semibold text-gray-600">Kustom Warna Latar Tema</label>
+                  <div class="flex gap-2 items-center">
+                    <input type="color" id="set-color" name="themeColor" class="p-1 border rounded-lg w-16 h-10 cursor-pointer bg-white">
+                    <span class="text-xs text-gray-500">Pilih warna latar belakang favorit Anda. Sistem akan menyesuaikan.</span>
+                  </div>
+                </div>
+
+                <!-- Music Background (File Manager) -->
+                <div class="col-span-2 flex flex-col gap-1 border border-dashed border-pink-300 p-3 rounded-xl bg-pink-50/30 mt-2">
+                  <label class="text-xs font-bold text-pink-800 flex items-center gap-1"><i class="fa-solid fa-music"></i> Unggah Musik Latar (MP3)</label>
+                  <input type="file" id="set-music-file" name="bgMusicFile" accept="audio/*" class="text-xs text-gray-500 file:mr-2 file:py-1 file:px-2 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-pink-100 file:text-pink-700 hover:file:bg-pink-200 cursor-pointer">
+                  <button id="btn-clear-music" type="button" class="mt-2 text-left text-[11px] text-red-500 hover:underline hidden"><i class="fa-solid fa-circle-xmark"></i> Hapus musik aktif</button>
+                </div>
+                
+                <button type="submit" class="col-span-2 w-full bg-pink-500 hover:bg-pink-600 text-white py-2.5 rounded-xl font-bold text-sm transition-all shadow-md mt-4">Simpan Pengaturan</button>
+              </form>
+            </div>
+
+            <!-- Form Media & Management -->
+            <div class="space-y-6">
+              <!-- Tambah Media Baru -->
+              <div class="bg-white/70 p-5 rounded-2xl border border-white/50 shadow-sm space-y-4">
+                <h3 class="text-lg font-bold text-pink-800 border-b pb-2"><i class="fa-solid fa-circle-plus"></i> Unggah Media Baru</h3>
+                <form id="media-upload-form" class="flex flex-col gap-3">
+                  <div class="flex flex-col gap-1">
+                    <label class="text-xs font-semibold text-gray-600">Tipe Media</label>
+                    <select id="media-type" class="p-2 border rounded-lg text-sm bg-white outline-none">
+                      <option value="foto">Foto (JPG, PNG, JPEG)</option>
+                      <option value="video">Video (MP4)</option>
+                    </select>
+                  </div>
+                  <div class="flex flex-col gap-1 border border-dashed border-gray-300 p-4 rounded-xl bg-gray-50 hover:bg-gray-100/50 transition-colors">
+                    <label class="text-xs font-semibold text-gray-600 mb-1">Pilih File dari Perangkat</label>
+                    <input type="file" id="media-file-input" required class="text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-pink-100 file:text-pink-700 hover:file:bg-pink-200 cursor-pointer">
+                  </div>
+                  
+                  <div id="upload-progress-container" class="hidden">
+                    <div class="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
+                      <div id="upload-progress" class="bg-pink-500 h-full w-0 transition-all duration-300"></div>
+                    </div>
+                    <span class="text-[10px] text-gray-500 mt-1 block">Sedang mengunggah berkas ke server...</span>
+                  </div>
+                  <button type="submit" id="btn-submit-media" class="w-full bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-xl text-sm font-semibold transition-all shadow-sm">Unggah Sekarang</button>
+                </form>
+              </div>
+
+              <!-- Daftar Semua File & Hapus -->
+              <div class="bg-white/70 p-5 rounded-2xl border border-white/50 shadow-sm flex flex-col h-[280px]">
+                <h3 class="text-lg font-bold text-pink-800 border-b pb-2 mb-3">Daftar Konten Galeri</h3>
+                <div id="admin-media-list" class="flex-1 overflow-y-auto space-y-2 pr-2 hide-scrollbar">
+                  <!-- Dinamis -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- FLOATING MUSIC PLAYER CONTROLLER -->
+  <div class="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-white/95 backdrop-blur-md px-4 py-3 rounded-2xl shadow-xl border border-pink-200/50 hover:scale-105 transition-all duration-300">
+    <div id="music-pulse-waves" class="hidden flex items-end gap-0.5 h-4">
+      <span class="w-1 bg-pink-500 rounded-full animate-bounce h-2" style="animation-duration: 0.8s"></span>
+      <span class="w-1 bg-pink-500 rounded-full animate-bounce h-4" style="animation-duration: 0.5s"></span>
+      <span class="w-1 bg-pink-500 rounded-full animate-bounce h-3" style="animation-duration: 0.7s"></span>
+    </div>
+    <button id="float-play-btn" onclick="togglePlayMusic()" class="w-10 h-10 bg-pink-500 hover:bg-pink-600 text-white rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all transform hover:scale-110">
+      <i id="float-music-icon" class="fa-solid fa-play ml-0.5"></i>
+    </button>
+    <div class="flex flex-col">
+      <span class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Musik Latar</span>
+      <span id="floating-song-title" class="text-xs font-bold text-gray-800 max-w-[120px] truncate">Muted / Tidak Ada</span>
+    </div>
+  </div>
+
+  <!-- ================= INSTAGRAM LOOK MODAL ================= -->
+  <div id="instagram-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
+    <div class="bg-white w-full max-w-5xl h-[85vh] rounded-3xl overflow-hidden flex flex-col md:flex-row relative shadow-2xl transition-all duration-500">
+      
+      <!-- Close button on Mobile -->
+      <button onclick="closeInstagramModal()" class="absolute top-4 right-4 z-50 p-2.5 bg-white/60 hover:bg-white rounded-full transition-colors md:hidden shadow-md">
+        <i class="fa-solid fa-xmark text-lg text-gray-800"></i>
+      </button>
+
+      <!-- Media Frame (Left Side) -->
+      <div class="w-full md:w-[60%] bg-black flex items-center justify-center relative h-64 md:h-full flex-shrink-0">
+        <img id="modal-img" src="" alt="Post" class="w-full h-full object-contain hidden">
+        <video id="modal-vid" src="" controls class="w-full h-full object-contain hidden"></video>
+      </div>
+
+      <!-- Interaction Sidebar (Right Side) -->
+      <div class="w-full md:w-[40%] flex flex-col h-full bg-white relative">
+        <!-- Sidebar Header -->
+        <div class="p-4 border-b border-gray-100 flex justify-between items-center">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center text-pink-500 text-sm border font-bold text-center">S</div>
+            <div>
+              <span class="font-bold text-sm text-gray-800 block leading-tight">Postingan Kelas</span>
+              <span id="modal-media-time" class="text-[9px] text-gray-400">Baru Saja</span>
+            </div>
+          </div>
+          <button onclick="closeInstagramModal()" class="p-2 hover:bg-gray-100 rounded-full transition-colors hidden md:block">
+            <i class="fa-solid fa-xmark text-lg text-gray-600"></i>
+          </button>
+        </div>
+
+        <!-- Comments Container -->
+        <div id="modal-comments" class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50 hide-scrollbar">
+          <!-- Dinamis -->
+        </div>
+
+        <!-- Actions and Comment Box -->
+        <div class="p-4 border-t border-gray-100 bg-white space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <button id="modal-like-btn" onclick="toggleLikeCurrent()" class="text-2xl hover:scale-110 transition-transform text-gray-800">
+                <i class="fa-regular fa-heart"></i>
+              </button>
+              <button class="text-2xl hover:scale-110 transition-transform text-gray-800">
+                <i class="fa-regular fa-comment"></i>
+              </button>
+            </div>
+            <div id="modal-likes-count" class="font-bold text-sm text-gray-800">0 Suka</div>
+          </div>
+
+          <!-- Input Komentar -->
+          <form id="modal-comment-form" class="space-y-2">
+            <input type="text" id="modal-cmt-name" placeholder="Nama Anda (Wajib)..." required class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-xs outline-none focus:ring-1 focus:ring-pink-300">
+            <div class="flex gap-2">
+              <input type="text" id="modal-cmt-text" placeholder="Tambahkan komentar..." required class="flex-1 bg-gray-100 border-none rounded-full px-4 py-2 text-sm outline-none focus:ring-1 focus:ring-pink-300">
+              <button type="submit" class="p-2 text-pink-600 hover:bg-pink-50 rounded-full transition-colors">
+                <i class="fa-solid fa-paper-plane text-lg"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Alert -->
+  <div id="custom-alert" class="fixed inset-0 bg-black/60 z-[100] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl transform scale-95 transition-all">
+      <div id="alert-icon" class="text-4xl text-pink-500 mb-3 animate-bounce"><i class="fa-solid fa-circle-info"></i></div>
+      <p id="alert-message" class="text-gray-700 font-semibold mb-4 leading-relaxed">Pesan notifikasi.</p>
+      <button onclick="closeAlert()" class="bg-pink-500 hover:bg-pink-600 text-white font-bold px-6 py-2.5 rounded-xl transition-all shadow-md">Ok</button>
+    </div>
+  </div>
+
+  <script>
+    // --- STATE MANAGEMENT ---
+    let siteSettings = {};
+    let mediaData = [];
+    let commentsData = [];
+    let activeMediaId = null;
+    let userId = localStorage.getItem('sakura_user_id') || '';
+    
+    if (!userId) {
+      userId = 'usr_' + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem('sakura_user_id', userId);
+    }
+
+    // Registrasikan Pengguna Aktif demi statistik Unik
+    async function registerUserSession() {
+      await apiRequest('/api/stats/join', 'POST', { userId });
+    }
+
+    // --- API UTILITIES ---
+    async function apiRequest(url, method = 'GET', body = null, isFormData = false) {
+      const options = { method };
+      if (body) {
+        if (isFormData) {
+          options.body = body;
+        } else {
+          options.headers = { 'Content-Type': 'application/json' };
+          options.body = JSON.stringify(body);
+        }
+      }
+      try {
+        const response = await fetch(url, options);
+        return await response.json();
+      } catch (err) {
+        console.error("API Error: ", err);
+      }
+    }
+
+    // Fetch All Data
+    async function loadData() {
+      siteSettings = await apiRequest('/api/settings');
+      mediaData = await apiRequest('/api/media');
+      commentsData = await apiRequest('/api/comments');
+      
+      applySettings();
+      renderMediaGalleries();
+      renderGuestbook();
+      renderAdminMediaList();
+      fetchStats();
+      if (activeMediaId) {
+        renderModalComments();
+      }
+    }
+
+    async function fetchStats() {
+      const stats = await apiRequest('/api/stats');
+      if (stats) {
+        document.getElementById('stat-users').innerText = stats.users || 0;
+        document.getElementById('stat-logs').innerText = stats.logs || 0;
+        document.getElementById('stat-photos').innerText = stats.photos || 0;
+        document.getElementById('stat-videos').innerText = stats.videos || 0;
+        document.getElementById('stat-guestbook').innerText = stats.guestbook || 0;
+        document.getElementById('stat-likes').innerText = stats.likes || 0;
+      }
+    }
+
+    // Format Tanggal Ke format Indonesia yang Indah
+    function formatIndoTime(timestamp) {
+      if (!timestamp) return 'Beberapa saat lalu';
+      const date = new Date(timestamp);
+      return date.toLocaleString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZoneName: 'short'
+      });
+    }
+
+    function applySettings() {
+      document.title = siteSettings.title;
+      document.getElementById('nav-title').innerText = siteSettings.title;
+      document.getElementById('nav-subtitle').innerText = siteSettings.sekolah;
+      
+      document.getElementById('home-class-name').innerText = siteSettings.namaKelas;
+      document.getElementById('home-sub').innerText = `${siteSettings.nomorKelas} - ${siteSettings.sekolah}`;
+      document.getElementById('home-desc').innerText = `"${siteSettings.desc}"`;
+      document.getElementById('home-wali').innerText = siteSettings.waliKelas;
+      
+      // Update Logo
+      if (siteSettings.logo) {
+        document.getElementById('nav-logo').src = siteSettings.logo;
+        document.getElementById('class-logo').src = siteSettings.logo;
+      }
+
+      // Kustom Warna Tema Dinamis
+      const themeColor = siteSettings.themeColor || '#ffb7c5';
+      document.body.style.backgroundColor = themeColor;
+      
+      // Mengubah warna style CSS untuk aksen (Custom properties)
+      document.documentElement.style.setProperty('--theme-color', themeColor);
+      
+      if (siteSettings.bgImage) {
+        document.body.style.backgroundImage = `url(${siteSettings.bgImage})`;
+      } else {
+        document.body.style.backgroundImage = `none`;
+      }
+
+      // Music Player
+      const musicEl = document.getElementById('bg-music');
+      const indicator = document.getElementById('music-indicator');
+      const clearMusicBtn = document.getElementById('btn-clear-music');
+      const floatingSongTitle = document.getElementById('floating-song-title');
+
+      if (siteSettings.bgMusic) {
+        if (musicEl.src !== window.location.origin + siteSettings.bgMusic && !musicEl.src.endsWith(siteSettings.bgMusic)) {
+          musicEl.src = siteSettings.bgMusic;
+        }
+        indicator.classList.remove('hidden');
+        if (clearMusicBtn) clearMusicBtn.classList.remove('hidden');
+        
+        const fileName = siteSettings.bgMusic.split('/').pop();
+        floatingSongTitle.innerText = decodeURIComponent(fileName);
+      } else {
+        musicEl.pause();
+        musicEl.src = "";
+        indicator.classList.add('hidden');
+        if (clearMusicBtn) clearMusicBtn.classList.add('hidden');
+        floatingSongTitle.innerText = "Tidak Ada";
+        updateFloatingMusicUI(false);
+      }
+
+      // Populate Inputs in Admin
+      document.getElementById('set-title').value = siteSettings.title || '';
+      document.getElementById('set-school').value = siteSettings.sekolah || '';
+      document.getElementById('set-classname').value = siteSettings.namaKelas || '';
+      document.getElementById('set-classno').value = siteSettings.nomorKelas || '';
+      document.getElementById('set-wali').value = siteSettings.waliKelas || '';
+      document.getElementById('set-desc').value = siteSettings.desc || '';
+      document.getElementById('set-color').value = themeColor;
+    }
+
+    // --- PAUSE / PLAY MUSIC CONTROLLER ---
+    function togglePlayMusic() {
+      const musicEl = document.getElementById('bg-music');
+      if (!musicEl.src || musicEl.src === window.location.origin + '/') {
+        showAlert("Musik latar belum diset oleh Admin.");
+        return;
+      }
+      if (musicEl.paused) {
+        musicEl.play().then(() => {
+          updateFloatingMusicUI(true);
+        }).catch(err => {
+          console.log("Autoplay diblokir browser, ketuk layar dahulu.");
+          showAlert("Ketuk layar terlebih dahulu untuk mengaktifkan musik.");
+        });
+      } else {
+        musicEl.pause();
+        updateFloatingMusicUI(false);
+      }
+    }
+
+    function updateFloatingMusicUI(isPlaying) {
+      const icon = document.getElementById('float-music-icon');
+      const waves = document.getElementById('music-pulse-waves');
+      const container = icon.parentElement;
+
+      if (isPlaying) {
+        icon.className = 'fa-solid fa-pause';
+        waves.classList.remove('hidden');
+        container.classList.add('bg-green-500', 'hover:bg-green-600');
+        container.classList.remove('bg-pink-500', 'hover:bg-pink-600');
+      } else {
+        icon.className = 'fa-solid fa-play ml-0.5';
+        waves.classList.add('hidden');
+        container.classList.add('bg-pink-500', 'hover:bg-pink-600');
+        container.classList.remove('bg-green-500', 'hover:bg-green-600');
+      }
+    }
+
+    // Autoplay Guard
+    document.addEventListener('click', () => {
+      const musicEl = document.getElementById('bg-music');
+      if (musicEl.src && musicEl.paused && !musicEl.dataset.interacted) {
+        musicEl.play().then(() => {
+          updateFloatingMusicUI(true);
+        }).catch(() => {});
+        musicEl.dataset.interacted = "true";
+      }
+    }, { once: true });
+
+
+    // --- RENDER GALLERIES (FOTO & VIDEO) ---
+    function renderMediaGalleries() {
+      const gridFoto = document.getElementById('grid-foto');
+      const gridVideo = document.getElementById('grid-video');
+      gridFoto.innerHTML = '';
+      gridVideo.innerHTML = '';
+
+      const fotos = mediaData.filter(m => m.type === 'foto');
+      const videos = mediaData.filter(m => m.type === 'video');
+
+      // Grid Foto
+      fotos.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'group aspect-square rounded-3xl overflow-hidden relative cursor-pointer shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-1';
+        div.onclick = () => openInstagramModal(item);
+        
+        const totalLikes = item.likes ? item.likes.length : 0;
+        const totalComments = commentsData.filter(c => c.targetId === item.id).length;
+
+        div.innerHTML = `
+          <img src="${item.url}" alt="Galeri" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500'">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 text-white">
+            <span class="text-[10px] opacity-75 mb-1"><i class="fa-regular fa-clock"></i> ${formatIndoTime(item.createdAt)}</span>
+            <div class="flex items-center gap-4 font-semibold">
+              <span class="flex items-center gap-1.5"><i class="fa-solid fa-heart text-pink-500"></i> ${totalLikes}</span>
+              <span class="flex items-center gap-1.5"><i class="fa-solid fa-comment"></i> ${totalComments}</span>
+            </div>
+          </div>
+        `;
+        gridFoto.appendChild(div);
+      });
+
+      if (fotos.length === 0) {
+        gridFoto.innerHTML = `<div class="col-span-full py-12 text-center text-gray-400 font-semibold"><i class="fa-solid fa-face-frown text-2xl block mb-2"></i> Belum ada foto yang diunggah</div>`;
+      }
+
+      // Grid Video
+      videos.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'group aspect-square rounded-3xl overflow-hidden relative cursor-pointer shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-1 bg-gray-900';
+        div.onclick = () => openInstagramModal(item);
+
+        const totalLikes = item.likes ? item.likes.length : 0;
+        const totalComments = commentsData.filter(c => c.targetId === item.id).length;
+
+        div.innerHTML = `
+          <video src="${item.url}" class="w-full h-full object-cover opacity-80" muted></video>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <i class="fa-solid fa-play text-white text-4xl opacity-90 group-hover:scale-125 transition-all duration-300"></i>
+          </div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4 text-white">
+            <span class="text-[10px] opacity-75 mb-1"><i class="fa-regular fa-clock"></i> ${formatIndoTime(item.createdAt)}</span>
+            <div class="flex items-center gap-4 font-semibold">
+              <span class="flex items-center gap-1.5"><i class="fa-solid fa-heart text-pink-500"></i> ${totalLikes}</span>
+              <span class="flex items-center gap-1.5"><i class="fa-solid fa-comment"></i> ${totalComments}</span>
+            </div>
+          </div>
+        `;
+        gridVideo.appendChild(div);
+      });
+
+      if (videos.length === 0) {
+        gridVideo.innerHTML = `<div class="col-span-full py-12 text-center text-gray-400 font-semibold"><i class="fa-solid fa-face-frown text-2xl block mb-2"></i> Belum ada video yang diunggah</div>`;
+      }
+    }
+
+    // --- INSTAGRAM LOOK MODAL ---
+    window.openInstagramModal = function(item) {
+      activeMediaId = item.id;
+      const modal = document.getElementById('instagram-modal');
+      const mImg = document.getElementById('modal-img');
+      const mVid = document.getElementById('modal-vid');
+      
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      document.getElementById('modal-media-time').innerHTML = `<i class="fa-regular fa-clock"></i> ${formatIndoTime(item.createdAt)}`;
+
+      if (item.type === 'foto') {
+        mImg.src = item.url;
+        mImg.classList.remove('hidden');
+        mVid.classList.add('hidden');
+        mVid.pause();
+      } else {
+        mVid.src = item.url;
+        mVid.classList.remove('hidden');
+        mImg.classList.add('hidden');
+        mVid.play();
+      }
+
+      updateLikeUI(item);
+      renderModalComments();
+    };
+
+    window.closeInstagramModal = function() {
+      activeMediaId = null;
+      document.getElementById('instagram-modal').classList.add('hidden');
+      document.getElementById('instagram-modal').classList.remove('flex');
+      document.getElementById('modal-vid').pause();
+    };
+
+    function updateLikeUI(item) {
+      const likes = item.likes || [];
+      const isLiked = likes.includes(userId);
+      const likeBtn = document.getElementById('modal-like-btn');
+      
+      if (isLiked) {
+        likeBtn.innerHTML = `<i class="fa-solid fa-heart text-pink-500 animate-bounce"></i>`;
+      } else {
+        likeBtn.innerHTML = `<i class="fa-regular fa-heart"></i>`;
+      }
+      document.getElementById('modal-likes-count').innerText = `${likes.length} Suka`;
+    }
+
+    window.toggleLikeCurrent = async function() {
+      if (!activeMediaId) return;
+      const res = await apiRequest(`/api/media/${activeMediaId}/like`, 'POST', { userId });
+      if (res && res.success) {
+        const itemIndex = mediaData.findIndex(m => m.id === activeMediaId);
+        if (itemIndex > -1) {
+          mediaData[itemIndex].likes = res.likes;
+          updateLikeUI(mediaData[itemIndex]);
+          renderMediaGalleries();
+          fetchStats();
+        }
+      }
+    };
+
+    // Modal Comments
+    function renderModalComments() {
+      const cBox = document.getElementById('modal-comments');
+      cBox.innerHTML = '';
+      
+      const postComments = commentsData.filter(c => c.targetId === activeMediaId);
+      
+      postComments.forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'group flex gap-3 text-sm items-start relative bg-white p-2.5 rounded-xl border border-gray-100 shadow-sm transition-all duration-300 hover:shadow-md';
+        const avatarSeed = encodeURIComponent(c.userName);
+        const isOwner = c.ownerId === userId;
+        
+        item.innerHTML = `
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${avatarSeed}" class="w-8 h-8 rounded-full bg-pink-100 flex-shrink-0 border">
+          <div class="flex-1 min-w-0 pr-12">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="font-bold text-gray-800 text-xs">${c.userName}</span>
+              <span class="text-[8px] text-gray-400 font-medium">${formatIndoTime(c.createdAt)}</span>
+            </div>
+            <p class="text-gray-700 mt-1 whitespace-pre-wrap text-xs leading-relaxed">${c.text}</p>
+          </div>
+          ${(isOwner || window.isAdminLoggedIn) ? `
+            <div class="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-0.5">
+              <button onclick="editComment('${c.id}')" class="p-1 text-blue-500 hover:bg-blue-50 rounded"><i class="fa-solid fa-pen text-[10px]"></i></button>
+              <button onclick="deleteComment('${c.id}')" class="p-1 text-red-500 hover:bg-red-50 rounded"><i class="fa-solid fa-trash text-[10px]"></i></button>
+            </div>
+          ` : ''}
+        `;
+        cBox.appendChild(item);
+      });
+
+      if (postComments.length === 0) {
+        cBox.innerHTML = `<div class="text-center py-8 text-gray-400 text-xs">Belum ada komentar.</div>`;
+      }
+    }
+
+    // Submit Modal Comment
+    document.getElementById('modal-comment-form').onsubmit = async function(e) {
+      e.preventDefault();
+      if (!activeMediaId) return;
+
+      const nameInput = document.getElementById('modal-cmt-name');
+      const textInput = document.getElementById('modal-cmt-text');
+
+      const body = {
+        targetId: activeMediaId,
+        userName: nameInput.value.trim(),
+        text: textInput.value.trim(),
+        ownerId: userId
+      };
+
+      const res = await apiRequest('/api/comments', 'POST', body);
+      if (res && res.success) {
+        commentsData.push(res.comment);
+        renderModalComments();
+        renderMediaGalleries();
+        fetchStats();
+        textInput.value = '';
+      }
+    };
+
+    // --- BUKU TAMU ---
+    function renderGuestbook() {
+      const cList = document.getElementById('comment-list');
+      cList.innerHTML = '';
+
+      const siteComments = commentsData.filter(c => c.targetId === 'website');
+
+      siteComments.forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'bg-white/80 p-5 rounded-3xl shadow-sm border border-pink-100/50 relative group flex gap-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5';
+        const avatarSeed = encodeURIComponent(c.userName);
+        const isOwner = c.ownerId === userId;
+
+        item.innerHTML = `
+          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${avatarSeed}" class="w-12 h-12 rounded-full bg-pink-100 flex-shrink-0 border-2 border-white shadow-sm">
+          <div class="flex-1">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h4 class="font-bold text-gray-800">${c.userName}</h4>
+              ${c.role ? `<span class="bg-pink-100 text-pink-700 text-[10px] px-2.5 py-0.5 rounded-full font-bold">${c.role}</span>` : ''}
+              <span class="text-[9px] text-gray-400 ml-auto flex items-center gap-1"><i class="fa-regular fa-clock"></i> ${formatIndoTime(c.createdAt)}</span>
+            </div>
+            <p class="text-gray-700 mt-2 text-sm leading-relaxed whitespace-pre-wrap">${c.text}</p>
+          </div>
+          ${(isOwner || window.isAdminLoggedIn) ? `
+            <div class="absolute right-4 bottom-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+              <button onclick="editComment('${c.id}')" class="p-2 text-blue-500 hover:bg-blue-50 rounded-xl transition-colors"><i class="fa-solid fa-pen-to-square"></i></button>
+              <button onclick="deleteComment('${c.id}')" class="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-colors"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          ` : ''}
+        `;
+        cList.appendChild(item);
+      });
+
+      if (siteComments.length === 0) {
+        cList.innerHTML = `<div class="text-center py-12 text-gray-400">Belum ada coretan di Buku Tamu.</div>`;
+      }
+    }
+
+    // Submit Guestbook
+    document.getElementById('comment-form').onsubmit = async function(e) {
+      e.preventDefault();
+      const sender = document.getElementById('cmt-sender').value.trim();
+      const role = document.getElementById('cmt-role').value.trim();
+      const text = document.getElementById('cmt-text').value.trim();
+
+      const res = await apiRequest('/api/comments', 'POST', { 
+        targetId: 'website', 
+        userName: sender, 
+        role, 
+        text,
+        ownerId: userId
+      });
+      if (res && res.success) {
+        commentsData.push(res.comment);
+        renderGuestbook();
+        fetchStats();
+        document.getElementById('cmt-text').value = '';
+        showAlert("Pesan dikirim ke Buku Tamu!");
+      }
+    };
+
+    window.editComment = async function(id) {
+      const original = commentsData.find(c => c.id === id);
+      if (!original) return;
+      
+      const text = prompt("Edit komentar Anda:", original.text);
+      if (text && text.trim()) {
+        const res = await apiRequest(`/api/comments/${id}`, 'PUT', { text: text.trim(), userId });
+        if (res && res.success) {
+          const idx = commentsData.findIndex(c => c.id === id);
+          commentsData[idx].text = text;
+          renderGuestbook();
+          if (activeMediaId) renderModalComments();
+          fetchStats();
+        } else {
+          showAlert(res.error || "Gagal mengedit pesan.");
+        }
+      }
+    };
+
+    window.deleteComment = async function(id) {
+      if (confirm("Hapus komentar ini?")) {
+        const res = await apiRequest(`/api/comments/${id}`, 'DELETE', { userId });
+        if (res && res.success) {
+          commentsData = commentsData.filter(c => c.id !== id);
+          renderGuestbook();
+          if (activeMediaId) renderModalComments();
+          fetchStats();
+        } else {
+          showAlert(res.error || "Gagal menghapus pesan.");
+        }
+      }
+    };
+
+    // --- ADMIN PANEL HANDLERS ---
+    document.getElementById('settings-form').onsubmit = async function(e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      
+      const res = await apiRequest('/api/settings', 'POST', formData, true);
+      if (res && res.success) {
+        siteSettings = res.settings;
+        applySettings();
+        fetchStats();
+        showAlert("Pengaturan website Sakura berhasil diperbarui!");
+      }
+    };
+
+    document.getElementById('btn-clear-music').onclick = async function() {
+      if (confirm("Hapus musik latar aktif?")) {
+        const res = await apiRequest('/api/settings/music', 'DELETE');
+        if (res && res.success) {
+          siteSettings = res.settings;
+          applySettings();
+          fetchStats();
+          showAlert("Musik berhasil dinonaktifkan.");
+        }
+      }
+    };
+
+    // Upload Media File
+    document.getElementById('media-upload-form').onsubmit = async function(e) {
+      e.preventDefault();
+      const type = document.getElementById('media-type').value;
+      const fileInput = document.getElementById('media-file-input');
+      const progressContainer = document.getElementById('upload-progress-container');
+      const progressBar = document.getElementById('upload-progress');
+      const submitBtn = document.getElementById('btn-submit-media');
+
+      if (!fileInput.files || !fileInput.files[0]) return;
+
+      const formData = new FormData();
+      formData.append('type', type);
+      formData.append('mediaFile', fileInput.files[0]);
+
+      submitBtn.disabled = true;
+      progressContainer.classList.remove('hidden');
+      progressBar.style.width = "40%";
+
+      const res = await apiRequest('/api/media', 'POST', formData, true);
+      progressBar.style.width = "100%";
+
+      setTimeout(() => {
+        submitBtn.disabled = false;
+        progressContainer.classList.add('hidden');
+        progressBar.style.width = "0%";
+        if (res && res.success) {
+          mediaData.push(res.media);
+          renderMediaGalleries();
+          renderAdminMediaList();
+          fetchStats();
+          fileInput.value = '';
+          showAlert("Berkas media baru sukses ditambahkan!");
+        } else {
+          showAlert("Gagal mengunggah berkas.");
+        }
+      }, 400);
+    };
+
+    function renderAdminMediaList() {
+      const mList = document.getElementById('admin-media-list');
+      mList.innerHTML = '';
+
+      mediaData.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between p-2.5 bg-white rounded-xl border border-gray-100 gap-3 hover:shadow-sm transition-all';
+        row.innerHTML = `
+          <div class="w-10 h-10 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center border">
+            ${item.type === 'foto' ? `<img src="${item.url}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-play text-gray-400"></i>`}
+          </div>
+          <div class="flex-1 min-w-0">
+            <h5 class="text-xs font-bold text-gray-800 capitalize leading-none mb-1">${item.type}</h5>
+            <p class="text-[8px] text-gray-400 truncate">${formatIndoTime(item.createdAt)}</p>
+          </div>
+          <button onclick="deleteMediaFromAdmin('${item.id}')" class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"><i class="fa-solid fa-trash-can"></i></button>
+        `;
+        mList.appendChild(row);
+      });
+    }
+
+    window.deleteMediaFromAdmin = async function(id) {
+      if (confirm("Hapus file media ini secara permanen dari server?")) {
+        const res = await apiRequest(`/api/media/${id}`, 'DELETE');
+        if (res && res.success) {
+          mediaData = mediaData.filter(m => m.id !== id);
+          renderMediaGalleries();
+          renderAdminMediaList();
+          fetchStats();
+          showAlert("Media berhasil dihapus dari galeri.");
+        }
+      }
+    };
+
+    // --- REALTIME JAM ASIA/JAKARTA ---
+    function updateRealtimeClock() {
+      const now = new Date();
+      // Mengubah jam sesuai zona waktu Asia/Jakarta (WIB)
+      const optionsTime = {
+        timeZone: 'Asia/Jakarta',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      };
+      const optionsDate = {
+        timeZone: 'Asia/Jakarta',
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      };
+      
+      const timeFormatter = new Intl.DateTimeFormat('id-ID', optionsTime);
+      const dateFormatter = new Intl.DateTimeFormat('id-ID', optionsDate);
+
+      document.getElementById('realtime-clock').innerText = timeFormatter.format(now) + " WIB";
+      document.getElementById('realtime-date').innerText = dateFormatter.format(now);
+    }
+    
+    // Mulai Jam realtime
+    setInterval(updateRealtimeClock, 1000);
+    updateRealtimeClock();
+
+    // Load initial data & Register session
+    registerUserSession().then(() => {
+      loadData();
+    });
+  </script>
+
+  <!-- ================= UI UTILS & ANIMATION ================= -->
+  <script>
+    window.isAdminLoggedIn = false;
+
+    window.switchView = function(viewId) {
+      document.querySelectorAll('.view-section').forEach(sec => {
+        sec.classList.add('view-hidden');
+      });
+      const activeSec = document.getElementById(`view-${viewId}`);
+      if (activeSec) activeSec.classList.remove('view-hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('text-pink-600', 'bg-pink-50', 'shadow-sm');
+        btn.classList.add('text-gray-600');
+      });
+      const activeBtn = document.getElementById(`btn-${viewId}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-gray-600');
+        activeBtn.classList.add('text-pink-600', 'bg-pink-50', 'shadow-sm');
+      }
+
+      const mVid = document.getElementById('modal-vid');
+      if (mVid) mVid.pause();
+    };
+
+    document.getElementById('admin-login-form').onsubmit = function(e) {
+      e.preventDefault();
+      const pass = document.getElementById('admin-password').value;
+      const errorBox = document.getElementById('login-error');
+
+      if (pass === 'admin355') { // Password sederhana untuk demo, ganti dengan yang lebih aman di produksi
+        window.isAdminLoggedIn = true;
+        errorBox.classList.add('hidden');
+        document.getElementById('admin-login-box').classList.add('hidden');
+        document.getElementById('admin-dashboard').classList.remove('hidden');
+        document.getElementById('admin-password').value = '';
+        renderGuestbook();
+        fetchStats();
+        showAlert("Selamat datang di panel Admin!");
+      } else {
+        errorBox.classList.remove('hidden');
+      }
+    };
+
+    window.logoutAdmin = function() {
+      window.isAdminLoggedIn = false;
+      document.getElementById('admin-dashboard').classList.add('hidden');
+      document.getElementById('admin-login-box').classList.remove('hidden');
+      renderGuestbook();
+      showAlert("Keluar dari panel admin.");
+    };
+
+    window.showAlert = function(msg) {
+      document.getElementById('alert-message').innerText = msg;
+      const alertBox = document.getElementById('custom-alert');
+      alertBox.classList.remove('hidden');
+      alertBox.classList.add('flex');
+    };
+
+    window.closeAlert = function() {
+      document.getElementById('custom-alert').classList.add('hidden');
+    };
+
+    // Sakura Rain
+    function createSakuraPetals() {
+      const container = document.getElementById('sakura-container');
+      container.innerHTML = ''; // bersihkan jika ada
+      for (let i = 0; i < 25; i++) {
+        const petal = document.createElement('div');
+        petal.className = 'sakura-petal';
+        petal.style.left = `${Math.random() * 100}vw`;
+        petal.style.animationDuration = `${Math.random() * 5 + 7}s`;
+        petal.style.animationDelay = `${Math.random() * 5}s`;
+        const size = `${Math.random() * 12 + 6}px`;
+        petal.style.width = size;
+        petal.style.height = size;
+        petal.style.opacity = Math.random() * 0.7 + 0.3;
+        container.appendChild(petal);
+      }
+    }
+
+    window.onload = createSakuraPetals;
+  </script>
+</body>
+</html>
